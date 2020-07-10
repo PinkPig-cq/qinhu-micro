@@ -10,7 +10,11 @@ import com.qinhu.microservice.order.api.service.IOrderServiceRpc;
 import com.qinhu.microservice.order.business.domain.Order;
 import com.qinhu.microservice.order.business.domain.OrderDomainEventPublisher;
 import com.qinhu.microservice.order.business.repository.OrderRepository;
+import com.qinhu.microservice.order.business.saga.confirmorder.ConfirmOrderSaga;
+import com.qinhu.microservice.order.business.saga.confirmorder.ConfirmOrderSagaState;
 import io.eventuate.tram.events.aggregates.ResultWithDomainEvents;
+import io.eventuate.tram.sagas.orchestration.SagaInstance;
+import io.eventuate.tram.sagas.orchestration.SagaInstanceFactory;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +24,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -34,6 +40,15 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
     OrderRepository orderRepository;
     @Autowired
     OrderDomainEventPublisher domainEventPublisher;
+
+    /**
+     * Saga构建工厂
+     */
+    @Autowired
+    SagaInstanceFactory sagaInstanceFactory;
+    @Autowired
+    ConfirmOrderSaga confirmOrderSaga;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -68,6 +83,17 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
             orderRepository.save(updateOrder);
             //商户发货事件通知
             domainEventPublisher.publish(order, confirmOrder.events);
+
+            /*
+             * Saga的调用
+             *   1.构建ConfirmOrder的Saga状态机
+             *   2.使用sagaInstanceFactory构建SagaInstance
+             *   3.框架自动将SagaInstance托管给SagaManager去调用
+             * */
+            BigDecimal totalPrice = order.getTotalPrice();
+            ConfirmOrderSagaState confirmOrderSagaState = new ConfirmOrderSagaState("000001", totalPrice,new ArrayList<>());
+
+            sagaInstanceFactory.create(confirmOrderSaga, confirmOrderSagaState);
 
             return order.toOrderVo();
         } else {

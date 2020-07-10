@@ -13,6 +13,19 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.eventuate.tram.sagas</groupId>
+            <artifactId>eventuate-tram-sagas-spring-participant</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.eventuate.tram.sagas</groupId>
+            <artifactId>eventuate-tram-sagas-spring-orchestration-simple-dsl
+            </artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.eventuate.tram.sagas</groupId>
+            <artifactId>eventuate-tram-sagas-spring-in-memory</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
             <scope>compile</scope>
@@ -25,10 +38,14 @@
             <groupId>com.playtika.testcontainers</groupId>
             <artifactId>embedded-mysql</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.qinhu</groupId>
             <artifactId>order-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.qinhu</groupId>
+            <artifactId>good-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

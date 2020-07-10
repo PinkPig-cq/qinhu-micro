@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OrderServiceEventMessageHandlersConfiguration {
 
-
     /**
      * 领域事件消费者
      * @return

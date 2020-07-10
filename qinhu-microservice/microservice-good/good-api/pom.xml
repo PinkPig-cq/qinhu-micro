@@ -11,5 +11,15 @@
 
     <artifactId>good-api</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>io.eventuate.tram.core</groupId>
+            <artifactId>eventuate-tram-spring-commands</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.qinhu</groupId>
+            <artifactId>order-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

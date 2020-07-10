@@ -10,7 +10,8 @@ import lombok.Getter;
 @Getter
 public enum CodeExceptionEnum implements CodeExceptionAssert{
 
-    OBJECT_NOT_EMPTY(6001, "{0} is NULL!");
+    OBJECT_NOT_EMPTY(6001, "{0} is NULL!"),
+    STRING_NOT_EMPTY(6001,"{0} is Empty!");
 
     CodeExceptionEnum(int code, String message) {
         this.code = code;

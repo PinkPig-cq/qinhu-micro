@@ -11,5 +11,19 @@
 
     <artifactId>good-business</artifactId>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>com.qinhu</groupId>
+            <artifactId>good-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.eventuate.tram.sagas</groupId>
+            <artifactId>eventuate-tram-sagas-spring-orchestration-simple-dsl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.eventuate.tram.sagas</groupId>
+            <artifactId>eventuate-tram-sagas-spring-participant</artifactId>
+        </dependency>
+    </dependencies>
 </project>

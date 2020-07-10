@@ -28,6 +28,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class Order {
         order.setGoods(JSON.toJSONString(orderDetail.getGoodsDetails()));
         order.setUserId(orderDetail.getUserId());
         order.setCreateTime(new Date());
-
+        order.setTotalPrice(calculatePrice(orderDetail.getGoodsDetails()));
         //构建领域事件
         final OrderCreatedEventLoad orderCreatedEventLoad = new OrderCreatedEventLoad(orderDetail, orderNo);
         final OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(orderCreatedEventLoad);
@@ -84,6 +85,24 @@ public class Order {
 
         return new ResultWithDomainEvents<>(this, orderConfirmedEvents);
 
+    }
+
+    /**
+     * 计算订单中商品总价
+     * @return 总价
+     */
+    private static BigDecimal calculatePrice(List<OrderGoodsDetail> goodsDetails) {
+
+        CodeExceptionEnum.STRING_NOT_EMPTY.assertCollectionNotILLEGAL(goodsDetails);
+
+        BigDecimal rts = new BigDecimal(0);
+        goodsDetails.forEach(arg -> {
+            rts.add(
+                    arg.getOldPrice()
+                            .multiply(new BigDecimal(arg.getNum())))
+                    .setScale(2, RoundingMode.HALF_DOWN);
+        });
+        return rts;
     }
 
     /**

@@ -12,6 +12,7 @@
     <modules>
         <module>common-core</module>
         <module>common-logback-sentry</module>
+        <module>common-test</module>
     </modules>
     <artifactId>qinhu-common</artifactId>
 

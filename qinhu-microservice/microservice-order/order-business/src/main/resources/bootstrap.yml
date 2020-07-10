@@ -20,6 +20,6 @@ spring:
 
 #变量名字
 nacos:
-  ip: 139.199.165.188 #nacosd地址
+  ip: 139.199.165.188  #nacosd地址
   database: micro_order  #数据库名字
 
