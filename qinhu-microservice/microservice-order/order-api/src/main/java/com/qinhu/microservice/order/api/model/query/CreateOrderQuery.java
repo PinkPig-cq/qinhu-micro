@@ -23,7 +23,23 @@ public class CreateOrderQuery {
      */
     @NonNull
     private Long userId;
-
+    /**
+     * 所属平台
+     */
+    @NonNull
+    private String front;
+    /**
+     * 收银员
+     */
+    private String cashier;
+    /**
+     * 设备号
+     */
+    private String deviceNo;
+    /**
+     * 桌子号
+     */
+    private String tableId;
     /**
      * 商品信息
      */

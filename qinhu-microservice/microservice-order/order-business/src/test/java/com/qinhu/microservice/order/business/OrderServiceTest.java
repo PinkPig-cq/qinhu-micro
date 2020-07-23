@@ -3,12 +3,11 @@ package com.qinhu.microservice.order.business;
 import com.playtika.test.common.spring.EmbeddedContainersShutdownAutoConfiguration;
 import com.playtika.test.mysql.EmbeddedMySQLBootstrapConfiguration;
 import com.playtika.test.mysql.EmbeddedMySQLDependenciesAutoConfiguration;
-import com.qinhu.common.test.TestContainerDependenciesConfig;
 import com.qinhu.microservice.order.api.model.OrderVo;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
 import com.qinhu.microservice.order.api.model.query.OrderGoodsDetail;
 import com.qinhu.microservice.order.api.service.IOrderServiceRpc;
-import com.qinhu.microservice.order.business.domain.OrderDomainEventPublisher;
+import com.qinhu.microservice.order.business.domain.eventpublisher.OrderDomainEventPublisher;
 import com.qinhu.microservice.order.business.repository.OrderRepository;
 import com.qinhu.microservice.order.business.service.OrderServiceRpcImpl;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ import java.util.List;
         EmbeddedMySQLDependenciesAutoConfiguration.class,  //配置一些依赖项,如Mysql的Datasource
         EmbeddedMySQLBootstrapConfiguration.class, //Docker镜像的初始化和启动
         EmbeddedContainersShutdownAutoConfiguration.class,//解决AllContainers这个Bean扫描不进去
-        TestContainerDependenciesConfig.class, //配置EmbeddedMySQLDependenciesAutoConfiguration的依赖项datasource
+       // TestContainerDependenciesConfig.class, //配置EmbeddedMySQLDependenciesAutoConfiguration的依赖项datasource
 })
 public class OrderServiceTest {
 

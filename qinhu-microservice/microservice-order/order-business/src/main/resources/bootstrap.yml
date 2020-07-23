@@ -12,8 +12,7 @@ spring:
         server-addr:  ${nacos.ip}:8848
         file-extension: yaml
         #共享文件设置
-        shared-dataids: micro-common.yaml
-        refreshable-dataids: micro-common.yaml
+        sharedConfigs: micro-common.yaml
 #  jpa:
 #    hibernate:
 #      ddl-auto: create
@@ -23,3 +22,30 @@ nacos:
   ip: 139.199.165.188  #nacosd地址
   database: micro_order  #数据库名字
 
+#配置 允许普罗米修斯主动拉取性能监控数据
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 2s
+        descriptions: true
+  web:
+    server:
+      auto-time-requests: true
+  endpoints:
+    prometheus:
+      id: springmetrics
+    web:
+      exposure:
+        include: health,info,env,prometheus,metrics,httptrace,threaddump,heapdump,springmetrics
+
+
+
+#management.metrics.export.prometheus.pushgateway:
+#  enabled: true
+#  base-url: http://localhost:9091 #metrics主动推送数据的网关
+#  job: batch-task
+#  shutdown-operation: push #应用关闭时策略  push:推送最后一次
+#  grouping-key:
+#    instance: ${random.value} #实例唯一id

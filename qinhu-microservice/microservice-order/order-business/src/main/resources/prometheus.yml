@@ -1,0 +1,9 @@
+#普罗米修斯主动拉取的时间间隔
+global:
+  scrape_interval: 10s
+scrape_configs:
+  - job_name: 'microservice-order-prometheus' #此次拉取的名字
+    metrics_path: '/actuator/prometheus'  #拉取的路径 -> Micrometer暴露的端口
+    static_configs:
+      - targets:
+          - "localhost:8080"

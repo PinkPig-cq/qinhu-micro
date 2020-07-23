@@ -1,6 +1,7 @@
-package com.qinhu.microservice.order.business.domain;
+package com.qinhu.microservice.order.business.domain.eventpublisher;
 
 import com.qinhu.microservice.order.api.event.OrderDomainEvent;
+import com.qinhu.microservice.order.business.domain.Order;
 import io.eventuate.tram.events.aggregates.AbstractAggregateDomainEventPublisher;
 import io.eventuate.tram.events.publisher.DomainEventPublisher;
 import org.springframework.stereotype.Component;
@@ -20,4 +21,5 @@ public class OrderDomainEventPublisher extends AbstractAggregateDomainEventPubli
     public OrderDomainEventPublisher(DomainEventPublisher eventPublisher) {
         super(eventPublisher, Order.class, Order::getId);
     }
+
 }

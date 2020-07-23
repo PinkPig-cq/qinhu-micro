@@ -1,6 +1,6 @@
 package com.qinhu.microservice.order.business;
 
-import io.sentry.Sentry;
+//import io.sentry.Sentry;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +20,15 @@ public class OrderApplication {
 
     public static void main(String[] args) {
 
-        Sentry.init();
+//        Sentry.init();
         SpringApplication.run(OrderApplication.class, args);
 
-        logger.error("111111111111111111111111111");
-
-        try {
-            int i =1/0;
-        }catch (Exception e){
-            logger.error("Caught exception!", e);
-        }
+//        logger.error("111111111111111111111111111");
+//
+//        try {
+//            int i =1/0;
+//        }catch (Exception e){
+//            logger.error("Caught exception!", e);
+//        }
     }
 }

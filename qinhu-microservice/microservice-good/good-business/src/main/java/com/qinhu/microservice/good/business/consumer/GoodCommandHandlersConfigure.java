@@ -32,7 +32,6 @@ public class GoodCommandHandlersConfigure {
     public SagaCommandDispatcher reduceStoreCommandHandlerDispatcher(
             final SagaCommandDispatcherFactory sagaCommandDispatcherFactory,
             final ReduceStoreCommandHandlers reduceStoreCommandHandlers) {
-
         return sagaCommandDispatcherFactory
                 .make("com.qinhu.microservice.good.business.consumer.GoodCommandHandlersConfigure.reduceStoreCommandHandlerDispatcher",
                         reduceStoreCommandHandlers.reduceStoreCommandHandlers());

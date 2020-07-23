@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @description: 添加Good库存的Handlers
+ *               用法同{@link ReduceStoreCommandHandlers}
  * @author: qh
  * @create: 2020-07-10 14:21
  **/
@@ -25,7 +26,6 @@ public class AddStoreCommandHandlers {
     }
 
     private Message addStoreCommandHandler(CommandMessage<AddStoreCommand> cm){
-
         //todo 补偿扣减的库存
         System.out.println("扣减库存的补偿事件");
         return CommandHandlerReplyBuilder.withSuccess();

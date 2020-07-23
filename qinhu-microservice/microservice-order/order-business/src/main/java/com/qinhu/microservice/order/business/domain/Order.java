@@ -8,6 +8,7 @@ import com.qinhu.microservice.order.api.event.OrderConfirmedEvent;
 import com.qinhu.microservice.order.api.event.OrderDomainEvent;
 import com.qinhu.microservice.order.api.event.OrderCreatedEvent;
 import com.qinhu.microservice.order.api.model.eventload.OrderCreatedEventLoad;
+import com.qinhu.microservice.order.api.model.query.ChangeOrderQuery;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
 import com.qinhu.microservice.order.api.model.query.OrderGoodsDetail;
 import com.qinhu.microservice.order.api.model.OrderPayStatus;
@@ -46,26 +47,54 @@ import java.util.Set;
 @Table(name = "micro_order")
 public class Order {
 
-
     public static ResultWithDomainEvents<Order, OrderDomainEvent> createOrder(final CreateOrderQuery orderDetail) {
 
         CodeExceptionEnum.OBJECT_NOT_EMPTY.assertCollectionNotILLEGAL(orderDetail.getGoodsDetails());
 
         //构建领域实体
         Order order = new Order();
+        BeanUtils.copyProperties(orderDetail, order);
         //获取唯一主键
         final String orderNo = SnowflakeIdUtil.getSnowId();
         order.setOrderNo(orderNo);
         order.setOrderStatus(OrderStatus.WAIT_PAY);
         order.setPayStatus(OrderPayStatus.PAY_NO);
         order.setGoods(JSON.toJSONString(orderDetail.getGoodsDetails()));
-        order.setUserId(orderDetail.getUserId());
         order.setCreateTime(new Date());
         order.setTotalPrice(calculatePrice(orderDetail.getGoodsDetails()));
+
         //构建领域事件
         final OrderCreatedEventLoad orderCreatedEventLoad = new OrderCreatedEventLoad(orderDetail, orderNo);
         final OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(orderCreatedEventLoad);
         return new ResultWithDomainEvents<>(order, orderCreatedEvent);
+    }
+
+    public static ResultWithDomainEvents<Order, OrderDomainEvent> changeOrder(final Order originalOrder,
+                                                                              final ChangeOrderQuery orderQuery) {
+        Order updateOrder = new Order();
+        updateOrder.setUpdateTime(new Date());
+        BeanUtils.copyProperties(orderQuery, updateOrder);
+
+        //如果涉及到优惠
+        if (orderQuery.getDiscount().doubleValue() != 0) {
+            updateOrder.setDiscount(orderQuery.getDiscount().setScale(2, RoundingMode.HALF_DOWN));
+            updateOrder.setPayPrice(originalOrder.getPayPrice().subtract(orderQuery.getDiscount()).setScale(2, RoundingMode.HALF_DOWN));
+        }
+        //如果设计到运费
+        if (orderQuery.getFreight().doubleValue() != 0) {
+            updateOrder.setFreight(orderQuery.getFreight().setScale(2, RoundingMode.HALF_DOWN));
+            updateOrder.setPayPrice(originalOrder.getPayPrice().add(orderQuery.getFreight()).setScale(2, RoundingMode.HALF_DOWN));
+            updateOrder.setTotalPrice(originalOrder.getTotalPrice().add(orderQuery.getFreight()).setScale(2, RoundingMode.HALF_DOWN));
+        }
+        //如果是支付完成
+        if (orderQuery.getOrderStatus().getKey() == OrderStatus.WAIT_DELIVERING.getKey()
+                && orderQuery.getPayStatus().getKey() == OrderPayStatus.PAY_YES.getKey()) {
+            updateOrder.setPayStatus(OrderPayStatus.PAY_YES);
+            updateOrder.setOrderStatus(OrderStatus.WAIT_DELIVERING);
+            updateOrder.setPayTime(new Date());
+        }
+
+        return new ResultWithDomainEvents<>(updateOrder, new ArrayList<>());
     }
 
     /**
@@ -89,6 +118,7 @@ public class Order {
 
     /**
      * 计算订单中商品总价
+     *
      * @return 总价
      */
     private static BigDecimal calculatePrice(List<OrderGoodsDetail> goodsDetails) {
@@ -179,27 +209,22 @@ public class Order {
     @Column(name = "pay_status")
     @Enumerated(EnumType.STRING)
     private OrderPayStatus payStatus;
-
     /**
      * 用户id
      */
     private Long userId;
-
     /**
      * 用户电话
      */
     private String userPhone;
-
     /**
      * 订单总金额
      */
     private BigDecimal totalPrice;
-
     /**
      * 实际需要支付金额
      */
     private BigDecimal payPrice;
-
     /**
      * 支付方式
      */
@@ -207,25 +232,21 @@ public class Order {
     /**
      * 所属平台
      */
-    private String paas;
-
+    private String front;
     /**
      * 备注
      */
     private String remark;
-
     /**
      * 创建时间
      */
     @Temporal(TemporalType.TIMESTAMP)
     private Date createTime;
-
     /**
      * 最后更新时间
      */
     @Temporal(TemporalType.TIMESTAMP)
     private Date updateTime;
-
     /**
      * 预留字段  目前用于存物流
      */
@@ -256,10 +277,6 @@ public class Order {
      */
     private Long shopId;
 
-    /**
-     * 运费
-     */
-    private BigDecimal freight;
 
     /**
      * 当前订单获取到的积分
@@ -269,6 +286,10 @@ public class Order {
      * 桌子号
      */
     private String tableId;
+    /**
+     * 运费
+     */
+    private BigDecimal freight;
 
     /**
      * 支付时间

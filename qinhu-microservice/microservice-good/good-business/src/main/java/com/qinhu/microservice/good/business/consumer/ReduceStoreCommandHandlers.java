@@ -18,7 +18,6 @@ import static io.eventuate.tram.commands.consumer.CommandHandlerReplyBuilder.wit
 @Component
 public class ReduceStoreCommandHandlers {
 
-
     /**
      * 将处理消息的方法和监听的队列绑定
      * @return CommandHandlers
