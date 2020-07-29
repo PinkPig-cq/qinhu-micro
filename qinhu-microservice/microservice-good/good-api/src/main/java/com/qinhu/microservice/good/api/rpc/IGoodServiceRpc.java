@@ -1,4 +1,4 @@
-package com.qinhu.microservice.good.api.model;
+package com.qinhu.microservice.good.api.rpc;
 
 /**
  * @description:

@@ -1,12 +1,13 @@
 package com.qinhu.microservice.order.business.domain;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
-import com.qinhu.common.core.exception.BusinessExceptionEnum;
 import com.qinhu.common.core.exception.CodeExceptionEnum;
 import com.qinhu.common.core.until.SnowflakeIdUtil;
 import com.qinhu.microservice.order.api.event.OrderConfirmedEvent;
 import com.qinhu.microservice.order.api.event.OrderDomainEvent;
 import com.qinhu.microservice.order.api.event.OrderCreatedEvent;
+import com.qinhu.microservice.order.api.model.PaymentName;
 import com.qinhu.microservice.order.api.model.eventload.OrderCreatedEventLoad;
 import com.qinhu.microservice.order.api.model.query.ChangeOrderQuery;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
@@ -32,7 +33,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,12 +76,12 @@ public class Order {
         BeanUtils.copyProperties(orderQuery, updateOrder);
 
         //如果涉及到优惠
-        if (orderQuery.getDiscount().doubleValue() != 0) {
+        if (orderQuery.getDiscount().doubleValue() != 0 && originalOrder != null) {
             updateOrder.setDiscount(orderQuery.getDiscount().setScale(2, RoundingMode.HALF_DOWN));
             updateOrder.setPayPrice(originalOrder.getPayPrice().subtract(orderQuery.getDiscount()).setScale(2, RoundingMode.HALF_DOWN));
         }
         //如果设计到运费
-        if (orderQuery.getFreight().doubleValue() != 0) {
+        if (orderQuery.getFreight().doubleValue() != 0 && originalOrder != null) {
             updateOrder.setFreight(orderQuery.getFreight().setScale(2, RoundingMode.HALF_DOWN));
             updateOrder.setPayPrice(originalOrder.getPayPrice().add(orderQuery.getFreight()).setScale(2, RoundingMode.HALF_DOWN));
             updateOrder.setTotalPrice(originalOrder.getTotalPrice().add(orderQuery.getFreight()).setScale(2, RoundingMode.HALF_DOWN));
@@ -126,12 +126,12 @@ public class Order {
         CodeExceptionEnum.STRING_NOT_EMPTY.assertCollectionNotILLEGAL(goodsDetails);
 
         BigDecimal rts = new BigDecimal(0);
-        goodsDetails.forEach(arg -> {
-            rts.add(
+        for (OrderGoodsDetail arg : goodsDetails) {
+           rts = rts.add(
                     arg.getOldPrice()
                             .multiply(new BigDecimal(arg.getNum())))
                     .setScale(2, RoundingMode.HALF_DOWN);
-        });
+        }
         return rts;
     }
 
@@ -206,7 +206,7 @@ public class Order {
     /**
      * 支付状态
      */
-    @Column(name = "pay_status")
+    @Column(name = "payStatus")
     @Enumerated(EnumType.STRING)
     private OrderPayStatus payStatus;
     /**
@@ -228,10 +228,11 @@ public class Order {
     /**
      * 支付方式
      */
-    private String paymentMethodName;
+    private PaymentName paymentMethodName;
     /**
      * 所属平台
      */
+    @Column(name = "paas")
     private String front;
     /**
      * 备注
@@ -277,6 +278,11 @@ public class Order {
      */
     private Long shopId;
 
+    /**
+     * 已退款
+     */
+    @Column(name = "is_refund", columnDefinition = "bit(1) default 1")
+    private boolean isRefund;
 
     /**
      * 当前订单获取到的积分

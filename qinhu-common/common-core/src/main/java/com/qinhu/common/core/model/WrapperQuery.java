@@ -1,6 +1,8 @@
 package com.qinhu.common.core.model;
 
 import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -65,4 +67,17 @@ public class WrapperQuery implements Serializable {
      */
     private Map<String, List<Number>> in;
 
+    /**
+     * between条件
+     */
+    private Map<String, Between> between;
+
+    @Data
+    @RequiredArgsConstructor
+    public static class Between<Type extends Comparable<? super Type>> {
+        @NonNull
+        Type value1;
+        @NonNull
+        Type value2;
+    }
 }

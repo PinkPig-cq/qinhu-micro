@@ -1,5 +1,6 @@
 package com.qinhu.microservice.order.api.model;
 
+import com.qinhu.common.core.exception.BusinessExceptionEnum;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
@@ -118,4 +119,22 @@ public enum OrderStatus {
         }
         return rts;
     }
+
+
+    /**
+     * 根据名字初始化订单状态枚举
+     * @param name 名字
+     * @return OrderStatus
+     */
+    public static OrderStatus initByName(String name) {
+        BusinessExceptionEnum.LICENCE_NOT_FOUND.assertNotEmpty(name);
+        OrderStatus[] values = OrderStatus.values();
+        for (OrderStatus orderStatus : values) {
+            if (name.equals(orderStatus.getName())) {
+                return orderStatus;
+            }
+        }
+        throw new RuntimeException("没有匹配的订单状态!");
+    }
+
 }

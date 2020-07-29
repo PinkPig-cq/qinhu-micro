@@ -2,6 +2,7 @@ package com.qinhu.microservice.order.business;
 
 import com.qinhu.common.core.model.WrapperQuery;
 import org.springframework.data.jpa.domain.Specification;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -95,6 +96,15 @@ public class WrapperQueryJpaResolver<T> {
                 for (String key : query.getOr().keySet()) {
                     Path<String> objectPath = root.get(key);
                     Predicate predicate = criteriaBuilder.equal(objectPath, query.getOr().get(key));
+                    and = criteriaBuilder.or(and, predicate);
+                }
+            }
+
+            if (query.getBetween() != null) {
+                for (String key : query.getBetween().keySet()) {
+                    WrapperQuery.Between between = query.getBetween().get(key);
+                    Path objectPath = root.get(key);
+                    Predicate predicate = criteriaBuilder.between(objectPath, between.getValue1(), between.getValue2());
                     and = criteriaBuilder.or(and, predicate);
                 }
             }

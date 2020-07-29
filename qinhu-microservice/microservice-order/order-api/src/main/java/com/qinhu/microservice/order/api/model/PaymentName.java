@@ -20,6 +20,14 @@ public enum PaymentName {
      */
     CMBPay(3, "CMBPay");
 
+    public String getName() {
+        return name;
+    }
+
+    public int getKey() {
+        return key;
+    }
+
     private String name;
     private int key;
 

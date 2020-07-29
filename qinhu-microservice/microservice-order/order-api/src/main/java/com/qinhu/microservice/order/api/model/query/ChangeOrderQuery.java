@@ -21,6 +21,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class ChangeOrderQuery {
 
+    private Long id;
+
     /**
      * 收货地址  todo 值对象
      */
@@ -50,7 +52,7 @@ public class ChangeOrderQuery {
     /**
      * 支付方式
      */
-    private PaymentName paymentName;
+    private PaymentName paymentMethodName;
 
     /**
      * 支付状态  默认为No

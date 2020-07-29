@@ -1,10 +1,16 @@
 package com.qinhu.microservice.order.api.service;
 
 import com.qinhu.common.core.model.BaseResponse;
+import com.qinhu.common.core.model.WrapperQuery;
+import com.qinhu.microservice.order.api.model.CommodityVoOrderCopy;
 import com.qinhu.microservice.order.api.model.OrderStatus;
 import com.qinhu.microservice.order.api.model.OrderVo;
 import com.qinhu.microservice.order.api.model.query.ChangeOrderQuery;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
+import org.apache.dubbo.common.utils.Page;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,24 +31,10 @@ public interface IOrderServiceRpc {
     /**
      * 改变订单状态
      *
-     * @param orderNo     订单号
-     * @param orderStatus 要改变的状态
-     * @param condition   关键条件 <field,value> 如:卖家id
+     * @param orderQuery 订单参数
      * @return OrderVo
      */
-    BaseResponse<OrderVo> changeOrderStatus(String orderNo, OrderStatus orderStatus, Map<String, Object> condition);
-
-    /**
-     * 改变订单状态 同时修改用户id
-     *
-     * @param orderNo     订单号
-     * @param userId      用户id
-     * @param orderStatus 要改变的状态
-     * @param condition   关键条件 <field,value> 如:卖家id
-     * @return
-     */
-    BaseResponse<OrderVo> changeOrderStatusByUserId(String orderNo, String userId, OrderStatus orderStatus, Map<String, Object> condition);
-
+    BaseResponse<OrderVo> editOrder(final ChangeOrderQuery orderQuery);
 
     /**
      * 统计一个时间段的(状态)订单总数
@@ -51,158 +43,111 @@ public interface IOrderServiceRpc {
      * @param end      结束时间
      * @param status   订单类型
      * @param sellerId 商户id
-     * @return
+     * @return Long
      */
-    BaseResponse<Long> countOrdersByDate(Long start, Long end, OrderStatus status, String sellerId);
+    BaseResponse<Long> countOrdersByDate(Date start, Date end, OrderStatus status, String sellerId);
+
 
     /**
-     * 根据条件查询
+     * 获取订单集合
      *
-     * @param condition 条件 map集合  <field,value>
-     * @return
+     * @param wrapperQuery 条件
+     * @return List<OrderVo>
      */
-    BaseResponse<OrderVo> getOrders(Map<String, Object> condition);
+    BaseResponse<List<OrderVo>> getListComplex(final WrapperQuery wrapperQuery);
+
 
     /**
-     * 根据用户id获取订单
+     * 获取订单分页
      *
-     * @param userId 用户id
-     * @param status 订单状态
-     * @return
+     * @param wrapperQuery 分页条件
+     * @return Page<OrderVo>
      */
-    BaseResponse<OrderVo> getOrdersByUserId(String userId, OrderStatus status);
+    BaseResponse<Page<OrderVo>> page(final WrapperQuery wrapperQuery);
 
     /**
-     * 根据key删除
+     * 批量更新
      *
-     * @param orderNo   订单号儿
-     * @param condition 删除条件
-     * @return
+     * @param queryList 待更新的订单对象
+     * @return bool
      */
-    BaseResponse<OrderVo> delOrders(String orderNo, Map<String, Object> condition);
+    boolean updateBatch(List<ChangeOrderQuery> queryList);
 
     /**
-     * 编辑订单
+     * 统计顶部数据
      *
-     * @param orderQuery
-     * @return
+     * @param orderStatisticsStrategy 统计时间策略
+     * @param shopName                查询的店铺名
+     * @param start                   开始时间
+     * @param end                     结束时间
+     * @return map
      */
-    BaseResponse<OrderVo> editOrder(OrderDetailQuery orderQuery);
+    BaseResponse<Map<String, Double>> topStatistics(final Integer orderStatisticsStrategy,
+                                                    final String shopName, final Date start,
+                                                    final Date end);
 
     /**
-     * 取消订单
+     * 交易金额  图表数据
      *
-     * @param orderNo 订单号
-     * @return
+     * @param orderStatisticsStrategy 统计时间策略
+     * @param shopName                查询的店铺名
+     * @param start                   开始时间
+     * @param end                     结束时间
+     * @return map
      */
-    BaseResponse<OrderVo> cancelOrder(String orderNo);
+    BaseResponse<Map<String,Map>> tradeStatistics(final Integer orderStatisticsStrategy,
+                                                                   final String shopName, final Date start,
+                                                                   final Date end);
 
     /**
-     * 支付订单
+     * 统计每种支付的笔数
      *
-     * @param orderNo
-     * @return
+     * @param orderStatisticsStrategy 统计时间策略
+     * @param shopName                查询的店铺名
+     * @param start                   开始时间
+     * @param end                     结束时间
+     * @return map
      */
-    BaseResponse<OrderVo> payOrder(String orderNo);
+    BaseResponse<Map<String, Integer>> countByPayMethodStatistics(final Integer orderStatisticsStrategy,
+                                                                  final String shopName, final Date start,
+                                                                  final Date end);
 
     /**
-     * 根据条件查询
+     * 统计每种支付的笔数
      *
-     * @param conditionJson
-     * @return
+     * @param orderStatisticsStrategy 统计时间策略
+     * @param shopName                查询的店铺名
+     * @param start                   开始时间
+     * @param end                     结束时间
+     * @return map
      */
-    BaseResponse<OrderVo> getOneOrder(Map<String, Object> conditionJson);
+    BaseResponse<Map<String, Number>> moneyByPayMethodStatistics(final Integer orderStatisticsStrategy,
+                                                                 final String shopName, final Date start,
+                                                                 final Date end);
 
     /**
-     * 满足条件的条数
+     * 每日金额变动统计
      *
-     * @param ew
-     * @return
+     * @param wrapperQuery 条件
+     * @return map
      */
-    long getCount(QueryWrapper ew);
+    BaseResponse<Map<String, BigDecimal>> everyDayWorkingCapital(final WrapperQuery wrapperQuery);
 
     /**
-     * 分页查询
+     * 统计当日 商品卖出和库存
      *
-     * @param pageWrapperQuery
-     * @return
+     * @param wrapperQuery 条件
+     * @return List<CommodityVo>
      */
-    BaseResponse<OrderVo> page(PageWrapperQuery pageWrapperQuery);
+    BaseResponse<List<CommodityVoOrderCopy>> statisticsGoodsMarketMoneyGroupSellerGood(final WrapperQuery wrapperQuery);
 
     /**
-     * 批量更新 更具rderNo
+     * 获取符合条件的订单条数
      *
-     * @param ordersCancels orderNo必填
-     * @return
+     * @param wrapperQuery 条件
+     * @return long
      */
-    BaseResponse<Boolean> updateBatch(List<OrderDetailQuery> ordersCancels);
-
-    /**
-     * 获取统计 头部数据
-     *
-     * @param iOrderStatisticsStrategy
-     * @return
-     */
-    BaseResponse<Map> statisticsTop(IOrderStatisticsStrategy iOrderStatisticsStrategy, String shopName, long start, long end);
-
-    /**
-     * 获取统计 折线图
-     *
-     * @param iOrderStatisticsStrategy
-     * @return
-     */
-    BaseResponse<Map> statisticsByChart(IOrderStatisticsStrategy iOrderStatisticsStrategy, String shopName, long start, long end);
-
-    /**
-     * 获取统计笔数 根据支付方式
-     *
-     * @param iOrderStatisticsStrategy
-     * @return
-     */
-    BaseResponse<Map> statisticsCountPayMethod(IOrderStatisticsStrategy iOrderStatisticsStrategy, String shopName, long start, long end);
-
-    /**
-     * 获取统计金额 根据支付方式
-     *
-     * @param iOrderStatisticsStrategy
-     * @return
-     */
-    BaseResponse<Map> statisticsMoneyPayMethod(IOrderStatisticsStrategy iOrderStatisticsStrategy, String shopName, long start, long end);
-
-    /**
-     * 获取统计下的订单
-     *
-     * @return
-     */
-    BaseResponse<Map> statisticsList(IOrderStatisticsStrategy iOrderStatisticsStrategy, String shopName, long start, long end, int payment);
-
-    /**
-     * 获取集合的复杂查询
-     *
-     * @param pageWrapperQuery 条件
-     * @return
-     */
-    BaseResponse<OrderVo> getListcomplex(PageWrapperQuery pageWrapperQuery);
-
-    /**
-     * 获取时间端的聚合支付金额&现金支付的总数
-     *
-     * @param pageWrapperQuery 查询条件构造 {@link PageWrapperQuery}
-     * @return
-     */
-    BaseResponse<OrderVo> statisticsAggregate(PageWrapperQuery pageWrapperQuery);
-
-    /**
-     * 统计商品售卖的金额  通过卖家id
-     *
-     * @param pageWrapperQuery 条件
-     * @return
-     */
-    BaseResponse<List<StatisticsGoods>> statisticsGoodsMarketMoneyGroupSellerGood(PageWrapperQuery pageWrapperQuery);
-
-
-//============================================================================================================================
-
+    long getCount(final WrapperQuery wrapperQuery);
 
     /**
      * 订单确认支付
@@ -212,5 +157,10 @@ public interface IOrderServiceRpc {
      */
     OrderVo confirm(final ChangeOrderQuery changeOrderQuery);
 
-
+    /**
+     * 根据订单号获取单个订单
+     * @param orderNo 订单号
+     * @return orderVo
+     */
+    BaseResponse<OrderVo> oneOrderByNo(String orderNo);
 }

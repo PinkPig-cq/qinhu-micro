@@ -14,6 +14,8 @@ import java.util.List;
 @Data
 public class OrderVo {
 
+    private Long id;
+
     private String orderNo;
 
     private Data createTime;
@@ -25,12 +27,12 @@ public class OrderVo {
     /**
      * 订单状态
      */
-    private String orderStatus;
+    private OrderStatus orderStatus;
 
     /**
      * 支付状态
      */
-    private String payStatus;
+    private OrderPayStatus payStatus;
     /**
      * 订单总金额
      */
@@ -43,7 +45,7 @@ public class OrderVo {
     /**
      * 支付方式
      */
-    private String paymentMethodName;
+    private PaymentName paymentMethodName;
 
     /**
      * 所属平台

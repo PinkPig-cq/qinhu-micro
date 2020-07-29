@@ -3,13 +3,16 @@ package com.qinhu.microservice.order.business;
 import com.playtika.test.common.spring.EmbeddedContainersShutdownAutoConfiguration;
 import com.playtika.test.mysql.EmbeddedMySQLBootstrapConfiguration;
 import com.playtika.test.mysql.EmbeddedMySQLDependenciesAutoConfiguration;
+import com.qinhu.common.test.TestContainerDependenciesConfig;
 import com.qinhu.microservice.order.api.model.OrderVo;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
 import com.qinhu.microservice.order.api.model.query.OrderGoodsDetail;
 import com.qinhu.microservice.order.api.service.IOrderServiceRpc;
 import com.qinhu.microservice.order.business.domain.eventpublisher.OrderDomainEventPublisher;
 import com.qinhu.microservice.order.business.repository.OrderRepository;
+import com.qinhu.microservice.order.business.saga.confirmorder.ConfirmOrderSaga;
 import com.qinhu.microservice.order.business.service.OrderServiceRpcImpl;
+import io.eventuate.tram.sagas.orchestration.SagaInstanceFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -19,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,18 +44,21 @@ import java.util.List;
         EmbeddedMySQLDependenciesAutoConfiguration.class,  //配置一些依赖项,如Mysql的Datasource
         EmbeddedMySQLBootstrapConfiguration.class, //Docker镜像的初始化和启动
         EmbeddedContainersShutdownAutoConfiguration.class,//解决AllContainers这个Bean扫描不进去
-       // TestContainerDependenciesConfig.class, //配置EmbeddedMySQLDependenciesAutoConfiguration的依赖项datasource
+        TestContainerDependenciesConfig.class,
+        //配置EmbeddedMySQLDependenciesAutoConfiguration的依赖项datasource
 })
 public class OrderServiceTest {
 
     @Autowired
-    IOrderServiceRpc orderServiceRpc;
+    public IOrderServiceRpc orderServiceRpc;
     @MockBean
     OrderDomainEventPublisher orderDomainEventPublisher;
+    @MockBean
+    SagaInstanceFactory sagaInstanceFactory;
+    @MockBean
+    ConfirmOrderSaga confirmOrderSaga;
 
-    @Test
-    public void test() {
-
+    public OrderVo test() {
         CreateOrderQuery createOrderQuery = new CreateOrderQuery();
         List<OrderGoodsDetail> list = new ArrayList<>(1);
         OrderGoodsDetail orderGoodsDetail = new OrderGoodsDetail();
@@ -65,9 +72,7 @@ public class OrderServiceTest {
         list.add(orderGoodsDetail);
         createOrderQuery.setGoodsDetails(list);
         createOrderQuery.setUserId(1L);
-        OrderVo order = orderServiceRpc.createOrder(createOrderQuery);
-        System.out.println(order);
-
+        return orderServiceRpc.createOrder(createOrderQuery).getData();
     }
 
 }

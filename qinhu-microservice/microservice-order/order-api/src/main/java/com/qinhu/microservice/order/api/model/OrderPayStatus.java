@@ -1,6 +1,7 @@
 package com.qinhu.microservice.order.api.model;
 
-import java.util.List;
+import com.qinhu.common.core.exception.BusinessExceptionEnum;
+
 
 /**
  * @description: 订单支付状态
@@ -12,11 +13,11 @@ public enum OrderPayStatus {
     /**
      * 已支付
      */
-    PAY_YES(1,"PAY_YES"),
+    PAY_YES(1, "PAY_YES"),
     /**
      * 未支付
      */
-    PAY_NO(0,"PAY_NO");
+    PAY_NO(0, "PAY_NO");
 
     private String name;
     private int key;
@@ -34,4 +35,20 @@ public enum OrderPayStatus {
         return key;
     }
 
+    /**
+     * 根据名字初始化枚举
+     * @param name 名字
+     * @return OrderPayStatus
+     */
+    public static OrderPayStatus initByName(String name) {
+        BusinessExceptionEnum.LICENCE_NOT_FOUND.assertNotEmpty(name);
+        OrderPayStatus[] values = OrderPayStatus.values();
+        for (OrderPayStatus orderPayStatus : values) {
+            if (name.equals(orderPayStatus.getName())) {
+                return orderPayStatus;
+            }
+        }
+
+        throw new RuntimeException("没有匹配的订单支付状态!");
+    }
 }
