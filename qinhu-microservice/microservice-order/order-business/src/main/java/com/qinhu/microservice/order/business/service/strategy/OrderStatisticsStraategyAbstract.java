@@ -75,17 +75,14 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
     public Map<String, BigDecimal> statisticsMoneyByPayMenthod(String shopName, long start, long end) {
         try {
             List<Order> list = getList(shopName, start, end, PayYESCondition);
-
             Map<String, BigDecimal> map = new LinkedHashMap<>();
-
-            list.stream().forEach(arg -> {
+            list.forEach(arg -> {
                 String key = arg.getPaymentMethodName().getName();
                 if (map.containsKey(key)) {
                     map.put(key, map.get(key).add(arg.getPayPrice()));
                 } else {
                     map.put(key, arg.getPayPrice());
                 }
-
             });
             return map;
         } catch (Exception e) {
@@ -97,10 +94,8 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
     public Map<String, Integer> statisticsCountByPayMenthod(String shopName, long start, long end) {
         try {
             List<Order> list = getList(shopName, start, end, PayYESCondition);
-
             Map<String, Integer> map = new LinkedHashMap<>();
-
-            list.stream().forEach(arg -> {
+            list.forEach(arg -> {
                 String key = arg.getPaymentMethodName().getName();
                 if (map.containsKey(key)) {
                     map.put(key, map.get(key) + 1);
@@ -167,16 +162,16 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
      * @param start     起始
      * @param end       结束
      * @param condition 额外条件
-     * @return
+     * @return BigDecimal
      */
-    protected BigDecimal statisticsMoney(String shopName, long start, long end, Map condition) {
+    protected BigDecimal statisticsMoney(String shopName, long start, long end, Map<String, String> condition) {
         try {
             //统计所有订单总额
             List<Order> list = getList(shopName, start, end, condition);
             AtomicReference<BigDecimal> atomTotalMoney = new AtomicReference<>();
             BigDecimal totalMoney = new BigDecimal(0);
             atomTotalMoney.set(totalMoney);
-            list.stream().forEach(arg ->
+            list.forEach(arg ->
                     atomTotalMoney.compareAndSet(atomTotalMoney.get(),
                             atomTotalMoney.get().add(arg.getPayPrice()).setScale(2, RoundingMode.HALF_DOWN))
             );
@@ -193,14 +188,14 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
      * @param start     起始
      * @param end       结束
      * @param condition 额外条件
-     * @return
+     * @return Integer
      */
-    protected Integer statisticsCount(String shopName, long start, long end, Map condition) {
+    protected Integer statisticsCount(String shopName, long start, long end, Map<String, String> condition) {
         try {
             //统计所有订单笔数
             List<Order> list = getList(shopName, start, end, condition);
             AtomicInteger totalCount = new AtomicInteger();
-            list.stream().forEach(arg -> totalCount.addAndGet(1));
+            list.forEach(arg -> totalCount.addAndGet(1));
             return totalCount.get();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -258,14 +253,13 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
      * @return HashMap
      */
     protected Map<String, BigDecimal> initMoneyMap(int capacity) {
-        Map<String, BigDecimal> map = new HashMap(capacity) {
+        return new HashMap<String, BigDecimal>(capacity) {
             {
                 for (int i = 1; i <= capacity; i++) {
                     put(i + "", new BigDecimal(0));
                 }
             }
         };
-        return map;
     }
 
     /**
@@ -275,14 +269,13 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
      * @return HashMap
      */
     protected Map<String, Integer> initCountMap(int capacity) {
-        Map<String, Integer> map = new HashMap(capacity) {
+        return new HashMap<String,Integer>(capacity) {
             {
                 for (int i = 1; i <= capacity; i++) {
                     put(i + "", 0);
                 }
             }
         };
-        return map;
     }
 
     /**
@@ -290,7 +283,7 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
      *
      * @param start 起始时间
      * @param end   结束时间
-     * @return
+     * @return boolean
      */
     private boolean checkCondition(long start, long end) {
 
@@ -302,7 +295,7 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
      * 选择支付方式
      *
      * @param paymentStrategy 支付方式选择  0:微信  1:支付宝
-     * @return
+     * @return String
      */
     protected String getPaymentName(int paymentStrategy) {
         switch (paymentStrategy) {
@@ -318,7 +311,7 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
     /**
      * 数据库
      */
-    protected List<Order> getListOnce(String shopName, long start, long end, Map codition) {
+    protected List<Order> getListOnce(String shopName, long start, long end, Map<String, String> codition) {
         try {
             //为空的时候走已支付 包括退款和完成订单
             lock.lock();
@@ -329,7 +322,7 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
             //当选择为退款时
             if (codition.containsKey(OrdersDBColumn.ORDER_STATUS)) {
                 return orders.stream()
-                        .filter(arg -> arg.getOrderStatus().equals(OrderStatus.REFUND.name()))
+                        .filter(arg -> OrderStatus.REFUND.equals(arg.getOrderStatus()))
                         .collect(Collectors.toList());
             }
             return orders;
@@ -342,7 +335,7 @@ public class OrderStatisticsStraategyAbstract implements IOrderStatisticsStrateg
      * map按照key排序
      *
      * @param waitSortMap 待排序map
-     * @return
+     * @return Map
      */
     protected Map sortByKey(Map waitSortMap) {
         Comparator<String> comparable = (o1, o2) -> {

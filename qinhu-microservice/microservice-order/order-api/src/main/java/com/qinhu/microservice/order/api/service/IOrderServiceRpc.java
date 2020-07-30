@@ -8,6 +8,9 @@ import com.qinhu.microservice.order.api.model.OrderVo;
 import com.qinhu.microservice.order.api.model.query.ChangeOrderQuery;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
 import org.apache.dubbo.common.utils.Page;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +21,7 @@ import java.util.Map;
  * @author: qh
  * @create: 2020-07-05 15:04
  **/
+@Validated
 public interface IOrderServiceRpc {
 
     /**
@@ -71,7 +75,7 @@ public interface IOrderServiceRpc {
      * @param queryList 待更新的订单对象
      * @return bool
      */
-    boolean updateBatch(List<ChangeOrderQuery> queryList);
+    boolean updateBatch(@NotNull(message = "集合不能为空!") List<ChangeOrderQuery> queryList);
 
     /**
      * 统计顶部数据
@@ -126,12 +130,12 @@ public interface IOrderServiceRpc {
                                                                  final Date end);
 
     /**
-     * 每日金额变动统计
+     * 按条件统计金额变动
      *
      * @param wrapperQuery 条件
      * @return map
      */
-    BaseResponse<Map<String, BigDecimal>> everyDayWorkingCapital(final WrapperQuery wrapperQuery);
+    BaseResponse<Map<String, BigDecimal>> workingCapitalStatistiscs(final WrapperQuery wrapperQuery);
 
     /**
      * 统计当日 商品卖出和库存

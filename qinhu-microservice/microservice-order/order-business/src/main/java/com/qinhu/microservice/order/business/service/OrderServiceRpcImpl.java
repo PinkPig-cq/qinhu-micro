@@ -1,5 +1,7 @@
 package com.qinhu.microservice.order.business.service;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
@@ -12,6 +14,7 @@ import com.qinhu.microservice.order.api.model.FrontType;
 import com.qinhu.microservice.order.api.model.OrderPayStatus;
 import com.qinhu.microservice.order.api.model.OrderStatus;
 import com.qinhu.microservice.order.api.model.OrderVo;
+import com.qinhu.microservice.order.api.model.PaymentName;
 import com.qinhu.microservice.order.api.model.query.ChangeOrderQuery;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
 import com.qinhu.microservice.order.api.service.IOrderServiceRpc;
@@ -27,6 +30,7 @@ import com.qinhu.microservice.order.business.service.strategy.OrderStatisticsStr
 import io.eventuate.tram.events.aggregates.ResultWithDomainEvents;
 import io.eventuate.tram.sagas.orchestration.SagaInstanceFactory;
 import io.micrometer.core.annotation.Timed;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,13 +40,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.xml.crypto.Data;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
  * @author: qh
  * @create: 2020-07-05 15:05
  **/
+@Slf4j
 @Service
 @DubboService(interfaceName = "IOrderServiceRpc", version = "0.0.1", document = "订单服务")
 public class OrderServiceRpcImpl implements IOrderServiceRpc {
@@ -117,9 +118,8 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
         final Order originalOrder = optional.get();
         final ResultWithDomainEvents<Order, OrderDomainEvent> orderChangeEvent = Order.changeOrder(originalOrder, orderQuery);
         Order updateOrder = orderChangeEvent.result;
-        updateOrder.setId(originalOrder.getId());
         orderRepository.save(updateOrder);
-        //todo 订单完成推送kafka ===> 有个消费记录
+        //todo 订单完成推送mq ===> 有个消费记录
         return BaseResponse.okData(updateOrder.toOrderVo());
     }
 
@@ -190,13 +190,31 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
     @Transactional(rollbackFor = Exception.class)
     public boolean updateBatch(List<ChangeOrderQuery> queryList) {
 
-        BusinessExceptionEnum.LICENCE_NOT_FOUND.assertCollectionNotILLEGAL(queryList);
-        for (ChangeOrderQuery changeOrderQuery : queryList) {
-            BusinessExceptionEnum.LICENCE_NOT_FOUND.assertNotNull(changeOrderQuery.getId());
+        //查询原有订单
+        List<String> orderNoList = queryList.stream()
+                .map(arg -> arg.getOrderNo())
+                .collect(Collectors.toList());
+        BusinessExceptionEnum.COLLECTION_NOT_ILLEGAL.assertCollectionNotILLEGAL(orderNoList);
+        Specification<Order> specification = (root, query, criteriaBuilder) -> {
+            CriteriaBuilder.In<String> orderNoIn = criteriaBuilder.in(root.get("orderNo"));
+            for (String orderNo : orderNoList) {
+                orderNoIn.value(orderNo);
+            }
+            return orderNoIn;
+        };
+        List<Order> originalOrders = orderRepository.findAll(specification);
+        if (originalOrders.size() != queryList.size()) {
+            log.debug("订单更新失败,待更新订单和原始订单不匹配！");
+            return false;
         }
+        BusinessExceptionEnum.LICENCE_NOT_FOUND.assertCollectionNotILLEGAL(queryList);
         List<Order> orderUpdate = new ArrayList<>(queryList.size());
         for (ChangeOrderQuery changeOrderQuery : queryList) {
-            orderUpdate.add(Order.changeOrder(null, changeOrderQuery).result);
+            Order originalOrder = originalOrders.stream()
+                    .filter(arg -> arg.getOrderNo().equals(changeOrderQuery.getOrderNo()))
+                    .findFirst().orElse(null);
+            BusinessExceptionEnum.LICENCE_NOT_FOUND.assertNotNull(originalOrder);
+            orderUpdate.add(Order.changeOrder(originalOrder, changeOrderQuery).result);
         }
 
         return orderRepository.saveAll(orderUpdate).size() != 0;
@@ -277,29 +295,29 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
 
 
     @Override
-    public BaseResponse<Map<String, BigDecimal>> everyDayWorkingCapital(final WrapperQuery wrapperQuery) {
+    public BaseResponse<Map<String, BigDecimal>> workingCapitalStatistiscs(final WrapperQuery wrapperQuery) {
 
         Specification<Order> queryWrapper = new WrapperQueryJpaResolver<Order>().getQueryWrapper(wrapperQuery);
-        final Specification<Order> otherSpec = (root, query, criteriaBuilder) -> {
+        Specification<Order> otherSpec = (root, query, criteriaBuilder) -> {
             Path<Order> payStatus = root.get("payStatus");
-            Predicate pPayStatus = criteriaBuilder.equal(payStatus, "PAY_YES");
+            Predicate pPayStatus = criteriaBuilder.equal(payStatus, OrderPayStatus.PAY_YES);
             Path<Order> front = root.get("front");
-            Predicate pFront = criteriaBuilder.equal(front, FrontType.CASHIER.getName());
+            Predicate pFront = criteriaBuilder.equal(front, FrontType.CASHIER);
             return criteriaBuilder.and(pPayStatus, pFront);
         };
         final Specification<Order> and = queryWrapper.and(otherSpec);
         List<Order> list = orderRepository.findAll(and);
         //返回结果
         HashMap<String, BigDecimal> rts = MapUtil.newHashMap(2);
-        rts.put("Aggregate", new BigDecimal(0));
-        rts.put("Money", new BigDecimal(0));
+        rts.put("AggregatePay", new BigDecimal(0));
+        rts.put("MoneyPay", new BigDecimal(0));
         rts.put("Discounts", new BigDecimal(0));
         if (list.size() == 0) {
             return BaseResponse.okData(rts);
         }
         //统计聚合支付的金额
         List<Order> aggregateList = list.stream()
-                .filter(arg -> !"现金支付".equals(arg.getPaymentMethodName()))
+                .filter(arg -> !PaymentName.CashPay.equals(arg.getPaymentMethodName()))
                 .collect(Collectors.toList());
         for (Order order : aggregateList) {
             BigDecimal amount = order.getPayPrice();
@@ -308,7 +326,7 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
         }
         //统计现金支付的金额
         List<Order> moneyList = list.stream()
-                .filter(arg -> "现金支付".equals(arg.getPaymentMethodName()))
+                .filter(arg -> PaymentName.CashPay.equals(arg.getPaymentMethodName()))
                 .collect(Collectors.toList());
         for (Order order : moneyList) {
             BigDecimal amount = order.getPayPrice();
@@ -400,10 +418,7 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
         BusinessExceptionEnum.LICENCE_NOT_FOUND.assertNotEmpty(orderNo);
 
         Optional<Order> optionalOrder = orderRepository.findOne((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("orderNo"), orderNo));
-        if (optionalOrder.isPresent()) {
-            return BaseResponse.okData(optionalOrder.get().toOrderVo());
-        }
-        return BaseResponse.errorMsg("未找到符合要求的订单!");
+        return optionalOrder.map(order -> BaseResponse.okData(order.toOrderVo())).orElseGet(() -> BaseResponse.errorMsg("未找到符合要求的订单!"));
     }
 
 }

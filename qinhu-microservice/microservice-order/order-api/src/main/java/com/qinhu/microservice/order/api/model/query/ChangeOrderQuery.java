@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -17,11 +19,10 @@ import java.util.Date;
  * @create: 2020-07-09 10:23
  **/
 @Data
+@Valid
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class ChangeOrderQuery {
-
-    private Long id;
 
     /**
      * 收货地址  todo 值对象
@@ -32,6 +33,7 @@ public class ChangeOrderQuery {
      * 订单号
      */
     @NonNull
+    @NotNull(message = "订单号不能为空!")
     private String orderNo;
 
     /**
@@ -44,6 +46,7 @@ public class ChangeOrderQuery {
      * 订单状态
      */
     @NonNull
+    @NotNull(message = "订单状态不能为空!")
     private OrderStatus orderStatus;
     /**
      * 统一下单 单号  唯一
@@ -69,9 +72,9 @@ public class ChangeOrderQuery {
     /**
      * 运费
      */
-    private BigDecimal freight = new BigDecimal(0);
+    private BigDecimal freight;
     /**
      * 折扣金额
      */
-    private BigDecimal discount = new BigDecimal(0);
+    private BigDecimal discount;
 }

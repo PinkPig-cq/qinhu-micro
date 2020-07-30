@@ -110,7 +110,7 @@ public class OrderStatisticsStrategyMonth extends OrderStatisticsStraategyAbstra
      *
      * @return
      */
-    private Map<String, BigDecimal> statisticsMoneyChart(String shopName, long start, long end, Map codition) {
+    private Map<String, BigDecimal> statisticsMoneyChart(String shopName, long start, long end, Map<String,String>  codition) {
 
         //获取默认时间
         start = getDefaultStart(start);
@@ -134,7 +134,7 @@ public class OrderStatisticsStrategyMonth extends OrderStatisticsStraategyAbstra
      *
      * @return
      */
-    private Map<String, Integer> statisticsCountChart(String shopName, long start, long end, Map codition) {
+    private Map<String, Integer> statisticsCountChart(String shopName, long start, long end, Map<String,String>  codition) {
         //获取默认时间
         start = getDefaultStart(start);
         end = getDefaultEnd(end);

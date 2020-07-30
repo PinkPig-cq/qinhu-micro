@@ -6,6 +6,7 @@ import com.qinhu.microservice.order.business.domain.Order;
 import com.qinhu.microservice.order.business.repository.OrderRepository;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -105,7 +106,7 @@ public class OrderStatisticsStrategyYear extends OrderStatisticsStraategyAbstrac
      *
      * @return
      */
-    private Map<String, BigDecimal> statisticsMoneyChart(String shopName, long start, long end, Map codition) {
+    private Map<String, BigDecimal> statisticsMoneyChart(String shopName, long start, long end, Map<String, String> codition) {
         start = getDefaultStart(start);
         end = getDefaultEnd(end);
         Map<String, BigDecimal> map = initMonthMoneyMap(start, end);
@@ -123,7 +124,7 @@ public class OrderStatisticsStrategyYear extends OrderStatisticsStraategyAbstrac
      *
      * @return
      */
-    private Map<String, Integer> statisticsCountChart(String shopName, long start, long end, Map codition) {
+    private Map<String, Integer> statisticsCountChart(String shopName, long start, long end, Map<String, String> codition) {
         start = getDefaultStart(start);
         end = getDefaultEnd(end);
         Map<String, Integer> map = initMonthCountMap(start, end);
@@ -144,7 +145,8 @@ public class OrderStatisticsStrategyYear extends OrderStatisticsStraategyAbstrac
     private void addCount(long oder, Map<String, Integer> map) {
 
         Date nextDate = DateUtil.endOfMonth(DateUtil.date(oder));
-        map.put(nextDate.getMonth() + 1 + "", map.get(nextDate.getMonth() + 1 + "") + 1);
+        Calendar calendar = new Calendar.Builder().setInstant(nextDate).build();
+        map.put(calendar.get(Calendar.MONTH) + 1 + "", map.get(calendar.get(Calendar.MONTH) + 1 + "") + 1);
 
     }
 
@@ -158,7 +160,8 @@ public class OrderStatisticsStrategyYear extends OrderStatisticsStraategyAbstrac
     private void addMoney(long oder, Map<String, BigDecimal> map, BigDecimal amount) {
 
         Date nextDate = DateUtil.endOfMonth(DateUtil.date(oder));
-        map.put(nextDate.getMonth() + 1 + "", map.get(nextDate.getMonth() + 1 + "").add(amount).setScale(2, BigDecimal.ROUND_HALF_DOWN));
+        Calendar calendar = new Calendar.Builder().setInstant(nextDate).build();
+        map.put(calendar.get(Calendar.MONTH) + 1 + "", map.get(calendar.get(Calendar.MONTH) + 1 + "").add(amount).setScale(2, BigDecimal.ROUND_HALF_DOWN));
 
     }
 
@@ -174,7 +177,9 @@ public class OrderStatisticsStrategyYear extends OrderStatisticsStraategyAbstrac
 
         Map<String, BigDecimal> map = new LinkedHashMap();
         for (long i = start; i <= end; i = DateUtil.offsetMonth(DateUtil.date(i), 1).getTime()) {
-            map.put(DateUtil.endOfMonth(DateUtil.date(i)).getMonth() + 1 + "", new BigDecimal(0));
+            Date nextDate = DateUtil.endOfMonth(DateUtil.date(i));
+            Calendar calendar = new Calendar.Builder().setInstant(nextDate).build();
+            map.put(calendar.get(Calendar.MONTH) + 1 + "", new BigDecimal(0));
         }
 
         return map;
@@ -191,7 +196,9 @@ public class OrderStatisticsStrategyYear extends OrderStatisticsStraategyAbstrac
 
         Map<String, Integer> map = new LinkedHashMap();
         for (long i = start; i <= end; i = (DateUtil.offsetMonth(DateUtil.date(i), 1)).getTime()) {
-            map.put(DateUtil.endOfMonth(DateUtil.date(i)).getMonth() + 1 + "", 0);
+            Date nextDate = DateUtil.endOfMonth(DateUtil.date(i));
+            Calendar calendar = new Calendar.Builder().setInstant(nextDate).build();
+            map.put(calendar.get(Calendar.MONTH) + 1 + "", 0);
         }
 
         return map;

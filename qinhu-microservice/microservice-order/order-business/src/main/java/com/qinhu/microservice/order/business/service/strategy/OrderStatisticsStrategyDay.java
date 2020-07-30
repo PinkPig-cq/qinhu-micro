@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import com.qinhu.microservice.order.business.domain.Order;
 import com.qinhu.microservice.order.business.repository.OrderRepository;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -127,7 +128,10 @@ public class OrderStatisticsStrategyDay extends OrderStatisticsStraategyAbstract
         //更具每小时处理数据
         list.stream().forEach(arg -> {
             int hour = (int) ((Math.ceil(arg.getUpdateTime().getTime() - dayStart) / LONGHOUR)) + 1;
-            map.put(hour + "", map.get(hour + "").add(arg.getPayPrice()));
+            //时间周期超过24H
+            if (hour < 24 && hour > 0) {
+                map.put(hour + "", map.get(hour + "").add(arg.getPayPrice()));
+            }
         });
         return sortByKey(map);
     }
@@ -154,7 +158,9 @@ public class OrderStatisticsStrategyDay extends OrderStatisticsStraategyAbstract
         //更具每小时处理数据
         list.stream().forEach(arg -> {
             int hour = (int) ((Math.ceil(arg.getUpdateTime().getTime() - dayStart) / LONGHOUR)) + 1;
-            map.put(hour + "", map.get(hour + "") + 1);
+            if (hour < 24 && hour > 0) {
+                map.put(hour + "", map.get(hour + "") + 1);
+            }
         });
         return sortByKey(map);
     }

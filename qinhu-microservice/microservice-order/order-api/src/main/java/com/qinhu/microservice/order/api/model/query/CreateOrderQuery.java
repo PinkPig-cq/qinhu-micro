@@ -1,5 +1,6 @@
 package com.qinhu.microservice.order.api.model.query;
 
+import com.qinhu.microservice.order.api.model.FrontType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,7 +28,7 @@ public class CreateOrderQuery {
      * 所属平台
      */
     @NonNull
-    private String front;
+    private FrontType front;
     /**
      * 收银员
      */

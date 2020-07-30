@@ -108,7 +108,7 @@ public class OrderStatisticsStrategyQuarter extends OrderStatisticsStraategyAbst
      *
      * @return
      */
-    private Map<String, BigDecimal> statisticsMoneyChart(String shopName, long start, long end, Map codition) {
+    private Map<String, BigDecimal> statisticsMoneyChart(String shopName, long start, long end, Map<String,String>  codition) {
 
         start = getDefaultStart(start);
         end = getDefaultEnd(end);
@@ -128,7 +128,7 @@ public class OrderStatisticsStrategyQuarter extends OrderStatisticsStraategyAbst
      *
      * @return
      */
-    private Map<String, Integer> statisticsCountChart(String shopName, long start, long end, Map codition) {
+    private Map<String, Integer> statisticsCountChart(String shopName, long start, long end, Map<String,String>  codition) {
         //如果没传开始时间，默认开始时间为今年1月1日
         if (start == 0) {
             start = DateUtil.beginOfYear(DateUtil.date()).getTime();

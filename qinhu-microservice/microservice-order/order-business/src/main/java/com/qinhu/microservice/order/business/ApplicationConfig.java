@@ -38,7 +38,7 @@ public class ApplicationConfig {
      * 将订单领域事件  发布者注入Bean
      *
      * @param domainEventPublisher 来自TramEventsPublisherConfiguration默认注入
-     * @return
+     * @return OrderDomainEventPublisher
      */
     @Bean
     public OrderDomainEventPublisher orderDomainEventPublisher(DomainEventPublisher domainEventPublisher) {
@@ -56,12 +56,9 @@ public class ApplicationConfig {
     @Bean
     public MeterRegistryCustomizer<MeterRegistry> registryCustomizer() {
 
-        return new MeterRegistryCustomizer<MeterRegistry>() {
-            @Override
-            public void customize(MeterRegistry registry) {
-                //自定义的注册器,在这里只是指定了这个监控的tag
-                registry.config().commonTags("MeterServiceName","microservice-order");
-            }
+        return registry -> {
+            //自定义的注册器,在这里只是指定了这个监控的tag
+            registry.config().commonTags("MeterServiceName","microservice-order");
         };
     }
 

@@ -4,6 +4,7 @@ import com.playtika.test.common.spring.EmbeddedContainersShutdownAutoConfigurati
 import com.playtika.test.mysql.EmbeddedMySQLBootstrapConfiguration;
 import com.playtika.test.mysql.EmbeddedMySQLDependenciesAutoConfiguration;
 import com.qinhu.common.test.TestContainerDependenciesConfig;
+import com.qinhu.microservice.order.api.model.FrontType;
 import com.qinhu.microservice.order.api.model.OrderVo;
 import com.qinhu.microservice.order.api.model.query.CreateOrderQuery;
 import com.qinhu.microservice.order.api.model.query.OrderGoodsDetail;
@@ -72,6 +73,7 @@ public class OrderServiceTest {
         list.add(orderGoodsDetail);
         createOrderQuery.setGoodsDetails(list);
         createOrderQuery.setUserId(1L);
+        createOrderQuery.setFront(FrontType.CASHIER);
         return orderServiceRpc.createOrder(createOrderQuery).getData();
     }
 

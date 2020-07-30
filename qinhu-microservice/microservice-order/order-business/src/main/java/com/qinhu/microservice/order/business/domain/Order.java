@@ -1,12 +1,16 @@
 package com.qinhu.microservice.order.business.domain;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
+import com.qinhu.common.core.exception.BusinessExceptionEnum;
 import com.qinhu.common.core.exception.CodeExceptionEnum;
 import com.qinhu.common.core.until.SnowflakeIdUtil;
 import com.qinhu.microservice.order.api.event.OrderConfirmedEvent;
 import com.qinhu.microservice.order.api.event.OrderDomainEvent;
 import com.qinhu.microservice.order.api.event.OrderCreatedEvent;
+import com.qinhu.microservice.order.api.model.FrontType;
 import com.qinhu.microservice.order.api.model.PaymentName;
 import com.qinhu.microservice.order.api.model.eventload.OrderCreatedEventLoad;
 import com.qinhu.microservice.order.api.model.query.ChangeOrderQuery;
@@ -17,6 +21,8 @@ import com.qinhu.microservice.order.api.model.OrderStatus;
 import com.qinhu.microservice.order.api.model.OrderVo;
 import io.eventuate.tram.events.aggregates.ResultWithDomainEvents;
 import lombok.Data;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Column;
@@ -44,6 +50,8 @@ import java.util.Set;
  **/
 @Data
 @Entity
+@DynamicInsert
+@DynamicUpdate
 @Table(name = "micro_order")
 public class Order {
 
@@ -62,7 +70,7 @@ public class Order {
         order.setGoods(JSON.toJSONString(orderDetail.getGoodsDetails()));
         order.setCreateTime(new Date());
         order.setTotalPrice(calculatePrice(orderDetail.getGoodsDetails()));
-
+        order.setPayPrice(order.getTotalPrice());
         //构建领域事件
         final OrderCreatedEventLoad orderCreatedEventLoad = new OrderCreatedEventLoad(orderDetail, orderNo);
         final OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(orderCreatedEventLoad);
@@ -71,17 +79,22 @@ public class Order {
 
     public static ResultWithDomainEvents<Order, OrderDomainEvent> changeOrder(final Order originalOrder,
                                                                               final ChangeOrderQuery orderQuery) {
-        Order updateOrder = new Order();
-        updateOrder.setUpdateTime(new Date());
-        BeanUtils.copyProperties(orderQuery, updateOrder);
 
+        BusinessExceptionEnum.LICENCE_NOT_FOUND.assertNotNull(originalOrder);
+
+        //将原始数据复制给更新对象 防止覆盖
+        Order updateOrder = new Order();
+        BeanUtil.copyProperties(originalOrder, updateOrder, CopyOptions.create().ignoreNullValue());
+        updateOrder.setUpdateTime(new Date());
+        BeanUtil.copyProperties(orderQuery, updateOrder, CopyOptions.create().ignoreNullValue());
+        updateOrder.setId(originalOrder.getId());
         //如果涉及到优惠
-        if (orderQuery.getDiscount().doubleValue() != 0 && originalOrder != null) {
+        if (orderQuery.getDiscount() != null) {
             updateOrder.setDiscount(orderQuery.getDiscount().setScale(2, RoundingMode.HALF_DOWN));
             updateOrder.setPayPrice(originalOrder.getPayPrice().subtract(orderQuery.getDiscount()).setScale(2, RoundingMode.HALF_DOWN));
         }
         //如果设计到运费
-        if (orderQuery.getFreight().doubleValue() != 0 && originalOrder != null) {
+        if (orderQuery.getFreight() != null) {
             updateOrder.setFreight(orderQuery.getFreight().setScale(2, RoundingMode.HALF_DOWN));
             updateOrder.setPayPrice(originalOrder.getPayPrice().add(orderQuery.getFreight()).setScale(2, RoundingMode.HALF_DOWN));
             updateOrder.setTotalPrice(originalOrder.getTotalPrice().add(orderQuery.getFreight()).setScale(2, RoundingMode.HALF_DOWN));
@@ -127,7 +140,7 @@ public class Order {
 
         BigDecimal rts = new BigDecimal(0);
         for (OrderGoodsDetail arg : goodsDetails) {
-           rts = rts.add(
+            rts = rts.add(
                     arg.getOldPrice()
                             .multiply(new BigDecimal(arg.getNum())))
                     .setScale(2, RoundingMode.HALF_DOWN);
@@ -233,7 +246,7 @@ public class Order {
      * 所属平台
      */
     @Column(name = "paas")
-    private String front;
+    private FrontType front;
     /**
      * 备注
      */
@@ -295,7 +308,7 @@ public class Order {
     /**
      * 运费
      */
-    private BigDecimal freight;
+    private BigDecimal freight = new BigDecimal(0);
 
     /**
      * 支付时间
@@ -306,6 +319,6 @@ public class Order {
     /**
      * 折扣金额
      */
-    private BigDecimal discount;
+    private BigDecimal discount = new BigDecimal(0);
 
 }

@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.qinhu.common.core.model.BaseResponse;
 import com.qinhu.common.core.model.PageQuery;
 import com.qinhu.common.core.model.WrapperQuery;
+import com.qinhu.microservice.order.api.model.CommodityVoOrderCopy;
 import com.qinhu.microservice.order.api.model.OrderPayStatus;
 import com.qinhu.microservice.order.api.model.OrderStatus;
 import com.qinhu.microservice.order.api.model.OrderVo;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.annotation.PostConstruct;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,22 +83,16 @@ class OrderServiceRpcImplTest extends OrderServiceTest {
 
     @Test
     void getListComplex() {
-
-
         BaseResponse<List<OrderVo>> listComplex = super.orderServiceRpc.getListComplex(wrapperQuery);
         List<OrderVo> data = listComplex.getData();
-
-
     }
 
     @Test
     void page() {
-
         PageQuery pageQuery = new PageQuery();
         pageQuery.setPageNo(1);
         pageQuery.setPageSize(5);
         wrapperQuery.setPageQuery(pageQuery);
-
 
         BaseResponse<Page<OrderVo>> page = super.orderServiceRpc.page(wrapperQuery);
         Page<OrderVo> data = page.getData();
@@ -113,8 +109,9 @@ class OrderServiceRpcImplTest extends OrderServiceTest {
         changeOrderQuery1.setOrderStatus(OrderStatus.WAIT_DELIVERING);
         changeOrderQuery1.setPaymentMethodName(PaymentName.WeChatPay);
         changeOrderQuery1.setPayStatus(OrderPayStatus.PAY_YES);
+
         ChangeOrderQuery changeOrderQuery2 = new ChangeOrderQuery();
-        BeanUtil.copyProperties(data.get(0), changeOrderQuery2);
+        BeanUtil.copyProperties(data.get(1), changeOrderQuery2);
         changeOrderQuery2.setOrderStatus(OrderStatus.WAIT_DELIVERING);
         changeOrderQuery2.setPaymentMethodName(PaymentName.WeChatPay);
         changeOrderQuery2.setPayStatus(OrderPayStatus.PAY_YES);
@@ -132,32 +129,52 @@ class OrderServiceRpcImplTest extends OrderServiceTest {
         BaseResponse<Map<String, Double>> mapBaseResponse = super.orderServiceRpc.topStatistics(8, "", DateUtil.date(new Date()).offset(DateField.DAY_OF_MONTH, -1),
                 DateUtil.date(new Date()).offset(DateField.DAY_OF_MONTH, 1));
         Map<String, Double> data = mapBaseResponse.getData();
-
     }
 
     @Test
     void tradeStatistics() {
+        updateBatch();
 
+        BaseResponse<Map<String, Map>> mapBaseResponse = orderServiceRpc.tradeStatistics(8, "", DateUtil.date(new Date()).offset(DateField.HOUR, -1),
+                DateUtil.date(new Date()).offset(DateField.HOUR, 1));
+        Map<String, Map> data = mapBaseResponse.getData();
     }
 
     @Test
     void countByPayMethodStatistics() {
+        updateBatch();
+        BaseResponse<Map<String, Integer>> mapBaseResponse = orderServiceRpc.countByPayMethodStatistics(8, "", DateUtil.date(new Date()).offset(DateField.HOUR, -1),
+                DateUtil.date(new Date()).offset(DateField.HOUR, 1));
+        Map<String, Integer> data = mapBaseResponse.getData();
     }
 
     @Test
     void moneyByPayMethodStatistics() {
+        updateBatch();
+        BaseResponse<Map<String, Number>> mapBaseResponse = orderServiceRpc.moneyByPayMethodStatistics(8, "", DateUtil.date(new Date()).offset(DateField.HOUR, -1),
+                DateUtil.date(new Date()).offset(DateField.HOUR, 1));
+        Map<String, Number> data = mapBaseResponse.getData();
     }
 
     @Test
     void everyDayWorkingCapital() {
+        updateBatch();
+        BaseResponse<Map<String, BigDecimal>> mapBaseResponse = orderServiceRpc.workingCapitalStatistiscs(wrapperQuery);
+        Map<String, BigDecimal> data = mapBaseResponse.getData();
     }
 
     @Test
     void statisticsGoodsMarketMoneyGroupSellerGood() {
+        updateBatch();
+        BaseResponse<List<CommodityVoOrderCopy>> listBaseResponse = orderServiceRpc.statisticsGoodsMarketMoneyGroupSellerGood(wrapperQuery);
+        List<CommodityVoOrderCopy> data = listBaseResponse.getData();
     }
 
     @Test
     void getCount() {
+        updateBatch();
+        long count = orderServiceRpc.getCount(wrapperQuery);
+        System.out.println(count);
     }
 
     @Test
