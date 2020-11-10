@@ -14,7 +14,6 @@ import com.qinhu.microservice.order.business.repository.OrderRepository;
 import com.qinhu.microservice.order.business.saga.confirmorder.ConfirmOrderSaga;
 import com.qinhu.microservice.order.business.service.OrderServiceRpcImpl;
 import io.eventuate.tram.sagas.orchestration.SagaInstanceFactory;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -23,7 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
