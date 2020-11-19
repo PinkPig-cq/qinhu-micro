@@ -16,6 +16,7 @@ import com.qinhu.microservice.order.api.model.query.ChangeOrderQuery;
 import com.qinhu.microservice.order.business.OrderServiceTest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.common.utils.Page;
+import org.aspectj.weaver.patterns.HasThisTypePatternTriedToSneakInSomeGenericOrParameterizedTypePatternMatchingStuffAnywhereVisitor;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.PostConstruct;
@@ -179,6 +180,10 @@ class OrderServiceRpcImplTest extends OrderServiceTest {
 
     @Test
     void confirm() {
+        OrderVo orderVo = test();
+        ChangeOrderQuery query = new ChangeOrderQuery();
+        query.setOrderNo(orderVo.getOrderNo());
+        orderServiceRpc.confirm( query);
     }
 
     private void log(Object obj, String methodName) {
@@ -186,4 +191,8 @@ class OrderServiceRpcImplTest extends OrderServiceTest {
         log.info(JSON.toJSONString(obj));
         log.info("=====================end {} =======================", methodName);
     }
+
+
+
+
 }

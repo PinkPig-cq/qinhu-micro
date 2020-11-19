@@ -1,7 +1,5 @@
 package com.qinhu.microservice.order.business.service;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
@@ -264,6 +262,8 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
         rts.put("退款金额", refundMoneyChartData);
         rts.put("退款笔数", refundCountChartData);
         return BaseResponse.okData(rts);
+
+
     }
 
     @Override
@@ -382,8 +382,9 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
     public OrderVo confirm(final ChangeOrderQuery changeOrderQuery) {
 
         Optional<Order> optional = orderRepository.findOne((Specification<Order>) (root, query, criteriaBuilder) -> {
-            root.get("orderNo");
-            return criteriaBuilder.equal(root, changeOrderQuery.getOrderNo());
+            Path<Object> path = root.get("orderNo");
+
+            return criteriaBuilder.equal(path, changeOrderQuery.getOrderNo());
         });
 
         if (optional.isPresent()) {
@@ -401,7 +402,7 @@ public class OrderServiceRpcImpl implements IOrderServiceRpc {
              *   3.框架自动将SagaInstance托管给SagaManager去调用
              * */
             BigDecimal totalPrice = order.getTotalPrice();
-            ConfirmOrderSagaState confirmOrderSagaState = new ConfirmOrderSagaState("000001", totalPrice, new ArrayList<>());
+            ConfirmOrderSagaState confirmOrderSagaState = new ConfirmOrderSagaState(order.getOrderNo(), totalPrice, new ArrayList<>());
 
             sagaInstanceFactory.create(confirmOrderSaga, confirmOrderSagaState);
 

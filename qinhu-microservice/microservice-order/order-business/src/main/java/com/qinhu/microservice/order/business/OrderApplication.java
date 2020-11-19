@@ -1,12 +1,14 @@
 package com.qinhu.microservice.order.business;
 
 //import io.sentry.Sentry;
+import io.sentry.Sentry;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
+//别、肯定、翻旧账、不要老拿时间说事儿、
+//
 /**
  * @description: 订单服务启动类
  * @author: qh
@@ -20,7 +22,7 @@ public class OrderApplication {
 
     public static void main(String[] args) {
 
-//        Sentry.init();
+        Sentry.init();
         SpringApplication.run(OrderApplication.class, args);
 
 //        logger.error("111111111111111111111111111");

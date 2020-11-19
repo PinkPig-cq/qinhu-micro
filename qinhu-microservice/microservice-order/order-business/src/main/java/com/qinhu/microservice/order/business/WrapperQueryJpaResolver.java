@@ -2,7 +2,6 @@ package com.qinhu.microservice.order.business;
 
 import com.qinhu.common.core.model.WrapperQuery;
 import org.springframework.data.jpa.domain.Specification;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;

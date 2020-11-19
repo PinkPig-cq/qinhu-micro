@@ -16,6 +16,7 @@
     <modules>
         <module>qinhu-microservice</module>
         <module>qinhu-common</module>
+        <module>dubbo-stea-starter</module>
     </modules>
     <dependencyManagement>
         <dependencies>

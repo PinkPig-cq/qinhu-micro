@@ -3,7 +3,7 @@ spring:
     allow-bean-definition-overriding: true
   #项目工程名，同时用于服务发现
   application:
-    name: micro_order
+    name: ${nacos.database}
   cloud:
     nacos:
       config:
@@ -18,7 +18,7 @@ spring:
 
 nacos:
   ip: 127.0.0.1  #nacosd地址
-  database: micro_order  #数据库名字
+  database: micro_good  #数据库名字
 
 #配置 允许普罗米修斯主动拉取性能监控数据
 management:
@@ -49,13 +49,3 @@ logging:
 #  grouping-key:
 #    instance: ${random.value} #实例唯一id
 
-
-
-#nacos其实不太适合dubbo,服务中心无用,
-dubbo:
-  provider:
-    loadbalance: leastactive
-  registry:
-    address: nacos://127.0.0.1:8848
-    protocol: dubbo
-    port: 20880
