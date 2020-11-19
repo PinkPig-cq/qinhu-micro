@@ -1,0 +1,26 @@
+{
+  "Name": "sagaStart",
+  "Comment": "saga start",
+  "StartState": "ReduceInventory",
+  "Version": "0.0.1",
+  "States": {
+    "ReduceInventory": {
+      "Type": "ServiceTask",
+      "ServiceName": "IProdcuer1Service",
+      "ServiceMethod": "sagaOne",
+      "CompensateState": "compentSagaOne",
+      "Next": "",
+      "Input": [
+        "$.[addMoney]",
+
+
+
+
+
+
+
+
+      ]
+    }
+  }
+}

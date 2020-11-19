@@ -1,5 +1,7 @@
 package com.qinhu.producer.service;
 
+import com.qinhu.api.Db;
+
 import java.math.BigDecimal;
 
 /**
@@ -7,18 +9,20 @@ import java.math.BigDecimal;
  * @author: qh
  * @create: 2020-11-13 15:40
  **/
-public interface IProducerService {
+public interface IProducer1Service {
 
     /**
      * xx
+     *
      * @param addMoney x
      * @return
      */
-    ProducerServiceImpl.Db saga(BigDecimal addMoney);
+    Db sagaOne(BigDecimal addMoney);
 
     /**
      * saga的补偿行为
+     *
      * @param addMoney x
      */
-    void compentSaga(BigDecimal addMoney);
+    void compentSagaOne(BigDecimal addMoney);
 }

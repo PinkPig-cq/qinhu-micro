@@ -49,8 +49,6 @@ logging:
 #  grouping-key:
 #    instance: ${random.value} #实例唯一id
 
-
-
 #nacos其实不太适合dubbo,服务中心无用,
 dubbo:
   provider:

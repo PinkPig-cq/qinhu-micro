@@ -1,0 +1,33 @@
+{
+  "Name": "sagaStart",
+  "Comment": "saga start",
+  "StartState": "ReduceInventory",
+  "Version": "0.0.1",
+  "States": {
+    "ReduceInventory": {
+      "Type": "ServiceTask",
+      "ServiceName": "IProducer1RPCProxy",
+      "ServiceMethod": "sagaOne",
+      "CompensateState": "compentSagaOne",
+      "Next": "",
+      "Input": [
+        "$.[addMoney]"
+      ],
+      "Output": {
+        "result": "$.#root"
+      },
+      "Status": {
+        "$Exception{java.lang.Throwable}": "UN"
+      }
+    },
+    "compentSagaOne": {
+        "Type": "ServiceTask",
+        "ServiceName": "IProducer1Service",
+        "ServiceMethod": "compentSagaOne",
+        "Input": [
+            ""
+        ]
+
+    }
+  }
+}

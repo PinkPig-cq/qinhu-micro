@@ -1,7 +1,12 @@
 package com.qinhu.producer;
 
+import com.qinhu.api.Db;
 import com.qinhu.api.IProducer1RPCProxy;
+import com.qinhu.producer.service.IProducer1Service;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.math.BigDecimal;
 
 /**
  * @description:
@@ -11,4 +16,16 @@ import org.apache.dubbo.config.annotation.DubboService;
 @DubboService(version = "1.0.1", tag = "producer1的代理")
 public class Prodecuer1RPCProxyImpl implements IProducer1RPCProxy {
 
+    @Autowired
+    IProducer1Service iProducer1Service;
+
+    @Override
+    public Db sagaOne(BigDecimal addMoney) {
+        return iProducer1Service.sagaOne(addMoney);
+    }
+
+    @Override
+    public void compentSagaOne(BigDecimal addMoney) {
+        iProducer1Service.compentSagaOne(addMoney);
+    }
 }
