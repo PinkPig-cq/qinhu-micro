@@ -6,21 +6,27 @@
   "States": {
     "ReduceInventory": {
       "Type": "ServiceTask",
-      "ServiceName": "IProdcuer1Service",
+      "ServiceName": "IProducer1RPCProxy",
       "ServiceMethod": "sagaOne",
       "CompensateState": "compentSagaOne",
       "Next": "",
       "Input": [
-        "$.[addMoney]",
-
-
-
-
-
-
-
-
-      ]
+        "$.[addMoney]"
+      ],
+      "Output": {
+        "result": "$.#root"
+      },
+      "Status": {
+        "$Exception{java.lang.Throwable}": "UN"
+      }
+    },
+    "compentSagaOne": {
+        "Type": "ServiceTask",
+        "ServiceName": "IProducer1Service",
+        "ServiceMethod": "compentSagaOne",
+        "Input": [
+            "[reduceInventoryResult]"
+        ]
     }
   }
 }

@@ -1,7 +1,6 @@
 package com.qinhu.producer2.service;
 
 import java.math.BigDecimal;
-
 /**
  * @description:
  * @author: qh

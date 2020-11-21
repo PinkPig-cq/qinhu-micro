@@ -29,9 +29,8 @@ public class ProducerStarter implements ApplicationRunner {
 
         Map<String,Object> startParams = new HashMap<>(1);
         startParams.put("addMoney",new BigDecimal(10));
-        stateMachineEngine.startWithBusinessKey("iProducer1Service",
+        stateMachineEngine.startWithBusinessKey("sagaStart",
                 null, "key", startParams);
-
 
     }
 }

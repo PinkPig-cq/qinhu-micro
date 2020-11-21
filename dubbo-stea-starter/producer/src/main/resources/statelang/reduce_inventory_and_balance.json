@@ -25,9 +25,8 @@
         "ServiceName": "IProducer1Service",
         "ServiceMethod": "compentSagaOne",
         "Input": [
-            ""
+            "[reduceInventoryResult]"
         ]
-
     }
   }
 }
