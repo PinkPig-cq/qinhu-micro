@@ -115,7 +115,7 @@
     </dependencyManagement>
 
     <properties>
-        <mysql-connector-java.version>8.0.15</mysql-connector-java.version>
+        <mysql-connector-java.version>8.0.28</mysql-connector-java.version>
         <nacos-discovery.version>2.2.1.RELEASE</nacos-discovery.version>
         <nacos-config.version>2.2.1.RELEASE</nacos-config.version>
         <dubbo.version>2.7.3</dubbo.version>
