@@ -123,7 +123,7 @@
         <lombok.version>1.18.12</lombok.version>
         <eventuate-tram-sagas.version>0.13.0.RELEASE</eventuate-tram-sagas.version>
         <eventuate-tram.version>0.24.0.RELEASE</eventuate-tram.version>
-        <hutool-core.version>5.3.8</hutool-core.version>
+        <hutool-core.version>5.8.19</hutool-core.version>
         <testcontainers.version>1.77</testcontainers.version>
         <sentry-spring.version>1.7.5</sentry-spring.version>
     </properties>
